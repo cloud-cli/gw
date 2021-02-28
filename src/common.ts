@@ -1,7 +1,6 @@
-import { IncomingMessage, ServerResponse } from 'http';
 import { Options, OptionsJson, OptionsText, OptionsUrlencoded } from 'body-parser';
-import { FormOptions } from 'multiparty';
 import { CorsOptions } from 'cors';
+import { IncomingMessage, ServerResponse } from 'http';
 
 export abstract class Resource {
   abstract get?(request: IncomingMessage, response: ServerResponse): Promise<any> | void;
@@ -12,7 +11,6 @@ export abstract class Resource {
   abstract options?(request: IncomingMessage, response: ServerResponse): Promise<any> | void;
 
   body?: BodyParserOptions;
-  form?: FormOptions;
   cors?: CorsOptions;
 }
 
@@ -22,6 +20,3 @@ export interface BodyParserOptions {
   text?: OptionsText;
   urlencoded?: OptionsUrlencoded;
 }
-
-// type fn = (...args: any[]) => any;
-// export const pipe = (...fns: Array<fn>) => fns.reduce((f, g) => (...args) => g(f(...args)));

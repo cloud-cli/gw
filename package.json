@@ -26,7 +26,6 @@
   },
   "dependencies": {
     "body-parser": "^1.19.0",
-    "cors": "^2.8.5",
-    "multiparty": "^4.2.2"
+    "cors": "^2.8.5"
   }
 }
