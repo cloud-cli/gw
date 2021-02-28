@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "moduleResolution": "node",
+    "target": "esnext",
+    "lib": ["ESNext", "DOM"],
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "typeRoots": ["./node_modules/@types"],
+    "types": ["jasmine", "node"],
+    "outDir": "./dist"
+  },
+  "include": ["./src/**/*.ts"]
+}
