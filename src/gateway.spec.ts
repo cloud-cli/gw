@@ -1,5 +1,6 @@
 import { IncomingMessage, ServerResponse } from 'http';
 import { Readable } from 'stream';
+import { Resource } from './common';
 import { Gateway, gateway } from './gateway';
 
 describe('Gateway', () => {
@@ -48,7 +49,7 @@ describe('Gateway', () => {
 
   it('should list all resources', () => {
     const { request, response, gateway } = setup('GET', '/');
-    gateway.add('test', {});
+    gateway.add('test', new Resource());
     gateway.dispatch(request, response);
 
     expectHeadBody(response, 200, '["test"]');
@@ -56,7 +57,7 @@ describe('Gateway', () => {
 
   it('should reject invalid method', () => {
     const { request, response, gateway } = setup('FOO', '/test');
-    gateway.add('test', {});
+    gateway.add('test', new Resource());
     gateway.dispatch(request, response);
 
     expectHeadBody(response, 405, '');
@@ -64,11 +65,13 @@ describe('Gateway', () => {
 
   it('should catch resource errors', async () => {
     const { request, response, gateway } = setup('GET', '/test');
-    gateway.add('test', {
+    class Test extends Resource {
       get() {
         throw new Error('oops!');
-      },
-    });
+      }
+    }
+
+    gateway.add('test', new Test());
 
     await gateway.dispatch(request, response);
 
@@ -77,15 +80,15 @@ describe('Gateway', () => {
 
   it('should process a GET request', async () => {
     const { request, response, gateway } = setup('GET', '/foo');
-
-    gateway.add('foo', {
-      async get(request, response: ServerResponse) {
+    class Foo extends Resource {
+      async get(request: IncomingMessage, response: ServerResponse) {
         const ok = await Promise.resolve(request.url);
         response.writeHead(200);
         response.end(ok);
-      },
-    });
+      }
+    }
 
+    gateway.add('foo', new Foo());
     await gateway.dispatch(request, response);
 
     expectHeadBody(response, 200, '/foo');
@@ -93,14 +96,16 @@ describe('Gateway', () => {
 
   it('should process a request with a subpath', async () => {
     const { request, response, gateway } = setup('PUT', '/foo/123');
-
-    gateway.add('foo', {
-      async put(request, response: ServerResponse) {
-        const ok = await Promise.resolve(request.url.slice(5));
-        response.writeHead(200);
-        response.end(ok);
-      },
-    });
+    gateway.add(
+      'foo',
+      new (class extends Resource {
+        async put(request: IncomingMessage, response: ServerResponse) {
+          const ok = await Promise.resolve(request.url.slice(5));
+          response.writeHead(200);
+          response.end(ok);
+        }
+      })(),
+    );
 
     await gateway.dispatch(request, response);
 
@@ -109,13 +114,16 @@ describe('Gateway', () => {
 
   it('should enable CORS', async () => {
     const { request, response, gateway } = setup('GET', '/foo');
-    gateway.add('foo', {
-      cors: {},
-      get() {
-        response.writeHead(200);
-        response.end('ok');
-      },
-    });
+    gateway.add(
+      'foo',
+      new (class extends Resource {
+        cors = {};
+        get() {
+          response.writeHead(200);
+          response.end('ok');
+        }
+      })(),
+    );
 
     request.headers = {
       origin: 'www.test.com',
@@ -131,14 +139,16 @@ describe('Gateway', () => {
   it('should parse a JSON request', async () => {
     const { request, response, gateway } = setup('POST', '/foo');
     const stream = createStream('{"ok": true}') as IncomingMessage & { body: any };
-
-    gateway.add('foo', {
-      body: { json: {} },
-      post() {
-        response.writeHead(200);
-        response.end('ok');
-      },
-    });
+    gateway.add(
+      'foo',
+      new (class extends Resource {
+        body = { json: {} };
+        post() {
+          response.writeHead(200);
+          response.end('ok');
+        }
+      })(),
+    );
 
     Object.assign(stream, request, {
       headers: {
@@ -158,13 +168,16 @@ describe('Gateway', () => {
     const text = 'hello world!';
     const stream = createStream(text) as IncomingMessage & { body: any };
 
-    gateway.add('foo', {
-      body: { text: {} },
-      post() {
-        response.writeHead(200);
-        response.end('ok');
-      },
-    });
+    gateway.add(
+      'foo',
+      new (class extends Resource {
+        body = { text: {} };
+        post() {
+          response.writeHead(200);
+          response.end('ok');
+        }
+      })(),
+    );
 
     Object.assign(stream, request, {
       headers: {
@@ -184,13 +197,17 @@ describe('Gateway', () => {
     const urlEncodedText = 'foo=1&bar=2';
     const stream = createStream(urlEncodedText) as IncomingMessage & { body: any };
 
-    gateway.add('foo', {
-      body: { urlencoded: { extended: false } },
-      post() {
-        response.writeHead(200);
-        response.end('ok');
-      },
-    });
+    gateway.add(
+      'foo',
+      new (class extends Resource {
+        body = { urlencoded: { extended: false } };
+
+        post() {
+          response.writeHead(200);
+          response.end('ok');
+        }
+      })(),
+    );
 
     Object.assign(stream, request, {
       headers: {
@@ -210,13 +227,16 @@ describe('Gateway', () => {
     const bufferedContent = 'foo bar';
     const stream = createStream(bufferedContent) as IncomingMessage & { body: any };
 
-    gateway.add('foo', {
-      body: { raw: {} },
-      post() {
-        response.writeHead(200);
-        response.end('ok');
-      },
-    });
+    gateway.add(
+      'foo',
+      new (class extends Resource {
+        body = { raw: {} };
+        post() {
+          response.writeHead(200);
+          response.end('ok');
+        }
+      })(),
+    );
 
     Object.assign(stream, request, {
       headers: {

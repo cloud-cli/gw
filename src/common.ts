@@ -2,13 +2,34 @@ import { Options, OptionsJson, OptionsText, OptionsUrlencoded } from 'body-parse
 import { CorsOptions } from 'cors';
 import { IncomingMessage, ServerResponse } from 'http';
 
-export abstract class Resource {
-  abstract get?(request: IncomingMessage, response: ServerResponse): Promise<any> | void;
-  abstract post?(request: IncomingMessage, response: ServerResponse): Promise<any> | void;
-  abstract put?(request: IncomingMessage, response: ServerResponse): Promise<any> | void;
-  abstract patch?(request: IncomingMessage, response: ServerResponse): Promise<any> | void;
-  abstract delete?(request: IncomingMessage, response: ServerResponse): Promise<any> | void;
-  abstract options?(request: IncomingMessage, response: ServerResponse): Promise<any> | void;
+function notImplemented(_: IncomingMessage, response: ServerResponse) {
+  response.writeHead(405);
+  response.end('');
+}
+export class Resource {
+  get(request: IncomingMessage, response: ServerResponse): Promise<any> | void {
+    notImplemented(request, response);
+  }
+
+  post(request: IncomingMessage, response: ServerResponse): Promise<any> | void {
+    notImplemented(request, response);
+  }
+
+  put(request: IncomingMessage, response: ServerResponse): Promise<any> | void {
+    notImplemented(request, response);
+  }
+
+  patch(request: IncomingMessage, response: ServerResponse): Promise<any> | void {
+    notImplemented(request, response);
+  }
+
+  delete(request: IncomingMessage, response: ServerResponse): Promise<any> | void {
+    notImplemented(request, response);
+  }
+
+  options(request: IncomingMessage, response: ServerResponse): Promise<any> | void {
+    notImplemented(request, response);
+  }
 
   body?: BodyParserOptions;
   cors?: CorsOptions;
