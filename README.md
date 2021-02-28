@@ -40,3 +40,38 @@ Then invoke the resource with an HTTP call
 ```
 GET /ponies
 ```
+
+A resource can implement any of the valid HTTP methods: get, post, put, delete, patch and options.
+The methods are called with the request/response objects from a vanilla Node.JS HTTP server.
+
+## CORS
+
+Add a property to a resource implmementation with the options to enable CORS.
+The available options are the same as [the cors module](https://www.npmjs.com/package/cors)
+
+```typescript
+import { Resource } from '@cloud-cli/gw';
+
+export class ResourceWithCors extends Resource {
+  cors = { ... }
+}
+```
+
+## Body parser
+
+Add a property to a resource implmementation with the options to enable CORS.
+The available options are the same as [the body-parser module options](https://www.npmjs.com/package/body-parser)
+
+```typescript
+import { Resource } from '@cloud-cli/gw';
+
+export class ResourceWithCors extends Resource {
+  // provide one of the 4 available options
+  body = {
+    json: {};
+    raw: {};
+    text: {};
+    urlencoded: {};
+  };
+}
+```
