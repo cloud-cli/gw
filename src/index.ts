@@ -1,4 +1,4 @@
-export { Resource } from './common';
+export { Resource } from './resource';
 export { Gateway } from './gateway';
 
 import { createServer } from 'https';

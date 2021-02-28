@@ -1,6 +1,6 @@
 import { IncomingMessage, ServerResponse } from 'http';
 import { Readable } from 'stream';
-import { Resource } from './common';
+import { Resource } from './resource';
 import { Gateway, gateway } from './gateway';
 
 describe('Gateway', () => {
