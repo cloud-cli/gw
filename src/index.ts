@@ -1,7 +1,8 @@
-import { createServer } from 'https';
-import { gateway, Gateway } from './gateway';
+export { Resource } from './common';
+export { Gateway } from './gateway';
 
-export { Gateway };
+import { createServer } from 'https';
+import { gateway } from './gateway';
 
 export default function () {
   return createServer((request, response) => gateway.dispatch(request, response)).listen(

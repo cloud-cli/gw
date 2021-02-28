@@ -1,5 +1,7 @@
 # GW
 
+A REST HTTP server implementation mapping resources to JS classes
+
 ## REST API
 
 #### List available resources
@@ -10,8 +12,10 @@ GET /
 
 #### Invoke a method in a resource
 
+Just like any REST service, invoke a resource with an HTTP method:
+
 ```
-[METHOD] /[resource name]
+[GET/POST/PUT/DELETE/PATCH/OPTIONS] /[resource name]/...
 ```
 
 ## JS API

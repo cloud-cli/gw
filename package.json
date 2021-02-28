@@ -1,5 +1,6 @@
 {
   "name": "@cloud-cli/gw",
+  "description": "A REST HTTP server implementation mapping resources to JS classes",
   "version": "0.0.0",
   "main": "dist/index.js",
   "type": "module",

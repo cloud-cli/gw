@@ -14,7 +14,7 @@ export abstract class Resource {
   cors?: CorsOptions;
 }
 
-export interface BodyParserOptions {
+interface BodyParserOptions {
   raw?: Options;
   json?: OptionsJson;
   text?: OptionsText;
