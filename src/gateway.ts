@@ -1,7 +1,7 @@
 import * as bodyParser from 'body-parser';
 import * as cors from 'cors';
 import { IncomingMessage, ServerResponse } from 'http';
-import { Resource } from './resource';
+import { Resource } from './resource.js';
 
 const validMethodRe = /^(get|post|put|patch|delete)$/i;
 
