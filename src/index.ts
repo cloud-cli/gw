@@ -1,4 +1,4 @@
-export { Resource } from './resource.js';
+export { Resource, Request, Response } from './resource.js';
 export { Gateway } from './gateway.js';
 
 import { createServer } from 'https';

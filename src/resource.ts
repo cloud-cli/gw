@@ -6,28 +6,35 @@ function notImplemented(_: IncomingMessage, response: ServerResponse) {
   response.writeHead(405);
   response.end('');
 }
+
+export class Request extends IncomingMessage {
+  body?: object | null;
+}
+
+export class Response extends ServerResponse {}
+
 export class Resource {
-  get(request: IncomingMessage, response: ServerResponse): Promise<any> | void {
+  get(request: Request, response: Response): Promise<any> | void {
     notImplemented(request, response);
   }
 
-  post(request: IncomingMessage, response: ServerResponse): Promise<any> | void {
+  post(request: Request, response: Response): Promise<any> | void {
     notImplemented(request, response);
   }
 
-  put(request: IncomingMessage, response: ServerResponse): Promise<any> | void {
+  put(request: Request, response: Response): Promise<any> | void {
     notImplemented(request, response);
   }
 
-  patch(request: IncomingMessage, response: ServerResponse): Promise<any> | void {
+  patch(request: Request, response: Response): Promise<any> | void {
     notImplemented(request, response);
   }
 
-  delete(request: IncomingMessage, response: ServerResponse): Promise<any> | void {
+  delete(request: Request, response: Response): Promise<any> | void {
     notImplemented(request, response);
   }
 
-  options(request: IncomingMessage, response: ServerResponse): Promise<any> | void {
+  options(request: Request, response: Response): Promise<any> | void {
     notImplemented(request, response);
   }
 

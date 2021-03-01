@@ -4,3 +4,4 @@ dist/*.spec.*
 src/
 jasmine.json
 .github
+test-api.js
