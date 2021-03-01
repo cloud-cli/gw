@@ -6,7 +6,7 @@
   "type": "module",
   "types": "./dist/index.d.ts",
   "scripts": {
-    "test": "./node_modules/.bin/ts-node ./node_modules/jasmine/bin/jasmine --config=./jasmine.json",
+    "test": "./node_modules/.bin/ts-node ./node_modules/jasmine/bin/jasmine --config=./jasmine.json && node test-api.js",
     "tdd": "./node_modules/.bin/nodemon -w src -e ts -x ./node_modules/.bin/ts-node ./node_modules/jasmine/bin/jasmine --config=./jasmine.json",
     "coverage": "./node_modules/.bin/nyc -r html -e .ts -x \"src/**/*.spec.ts\" npm run test",
     "build": "rm -rf ./dist/* && tsc --project ./tsconfig.json"
