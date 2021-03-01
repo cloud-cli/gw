@@ -69,7 +69,7 @@ The available options are the same as [the body-parser module options](https://w
 ```typescript
 import { Resource } from '@cloud-cli/gw';
 
-export class ResourceWithCors extends Resource {
+export class ResourceWithBody extends Resource {
   // provide one of the 4 available options
   body = {
     json: {};
