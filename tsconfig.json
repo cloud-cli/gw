@@ -5,6 +5,7 @@
     "lib": ["ESNext"],
     "noUnusedLocals": true,
     "noUnusedParameters": true,
+    "esModuleInterop": true,
     "typeRoots": ["./node_modules/@types"],
     "types": ["jasmine", "node"],
     "outDir": "./dist",

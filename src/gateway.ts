@@ -1,5 +1,5 @@
-import * as bodyParser from 'body-parser';
-import * as cors from 'cors';
+import bodyParser from 'body-parser';
+import cors from 'cors';
 import { IncomingMessage, ServerResponse } from 'http';
 import { Resource } from './resource.js';
 
