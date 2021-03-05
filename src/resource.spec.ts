@@ -1,7 +1,7 @@
 import { Resource } from './resource';
 
 describe('Resource', () => {
-  ['get', 'post', 'patch', 'put', 'delete', 'options'].forEach((methodName) => {
+  ['head', 'get', 'post', 'patch', 'put', 'delete', 'options'].forEach((methodName) => {
     it(`should have a default implementation for ${methodName} method`, () => {
       class ImplementedResource extends Resource {}
       const resource = new ImplementedResource();
