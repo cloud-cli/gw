@@ -15,7 +15,7 @@ GET /
 Just like any REST service, invoke a resource with an HTTP method:
 
 ```
-[GET/POST/PUT/DELETE/PATCH/OPTIONS] /[resource name]/...
+[HEAD/GET/POST/PUT/DELETE/PATCH/OPTIONS] /[resource name]/...
 ```
 
 ## JS API

@@ -3,7 +3,7 @@ import cors from 'cors';
 import { IncomingMessage, ServerResponse } from 'http';
 import { Resource } from './resource.js';
 
-const validMethodRe = /^(get|post|put|patch|delete)$/i;
+const validMethodRe = /^(head|get|post|put|patch|delete)$/i;
 
 export class Gateway {
   private resources = new Map<string, Resource>([]);

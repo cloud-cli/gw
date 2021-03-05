@@ -14,6 +14,10 @@ export class Request extends IncomingMessage {
 export class Response extends ServerResponse {}
 
 export class Resource {
+  head(request: Request, response: Response): Promise<any> | void {
+    notImplemented(request, response);
+  }
+
   get(request: Request, response: Response): Promise<any> | void {
     notImplemented(request, response);
   }
