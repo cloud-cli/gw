@@ -1,10 +1,13 @@
-# GW
+# Gateway
 
-A REST HTTP server implementation mapping resources to JS classes
+A minimal REST HTTP server implementation.
+Provides resources as JS classes.
 
 ## REST API
 
 #### List available resources
+
+List all registered resources for discovery
 
 ```
 GET /

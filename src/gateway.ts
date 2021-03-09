@@ -40,6 +40,12 @@ export class Gateway {
     const { resourceName, methodName } = this.readMethodAndResource(request);
     const resource = this.resources.get(resourceName);
 
+    if (!resource[methodName]) {
+      response.writeHead(405);
+      response.end('');
+      return;
+    }
+
     try {
       await this.processCors(request, response, resource);
       await this.processBody(request, response, resource);
