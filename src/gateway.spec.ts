@@ -91,7 +91,8 @@ describe('Gateway', () => {
     gateway.add('foo', new Foo());
     await gateway.dispatch(request, response);
 
-    expectHeadBody(response, 200, '/foo');
+    expectHeadBody(response, 200, '');
+    expect(request.url).toBe('');
   });
 
   it('should process a request with a subpath', async () => {
@@ -100,7 +101,7 @@ describe('Gateway', () => {
       'foo',
       new (class extends Resource {
         async put(request: IncomingMessage, response: ServerResponse) {
-          const ok = await Promise.resolve(request.url.slice(5));
+          const ok = await Promise.resolve(request.url);
           response.writeHead(200);
           response.end(ok);
         }
@@ -109,7 +110,7 @@ describe('Gateway', () => {
 
     await gateway.dispatch(request, response);
 
-    expectHeadBody(response, 200, '123');
+    expectHeadBody(response, 200, '/123');
   });
 
   it('should enable CORS', async () => {

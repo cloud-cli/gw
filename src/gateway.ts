@@ -51,6 +51,8 @@ export class Gateway {
       await this.processBody(request, response, resource);
 
       response.setHeader('X-Powered-by', '@cloud-cli/gw');
+      request.url = request.url.slice(1).replace(resourceName, '');
+
       console.log(JSON.stringify({ name: 'gw', time: Date.now(), method: methodName, resource: resourceName }));
 
       return await resource[methodName](request, response);
