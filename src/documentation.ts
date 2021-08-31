@@ -1,12 +1,14 @@
 import { readFile } from 'fs/promises';
 import MarkdownIt from 'markdown-it';
 import { join } from 'path';
-import { Request, Response } from './resource.js';
+import { Request, Response, Resource } from './resource.js';
 
-export class Documentation {
+export class Documentation extends Resource {
   private renderer = new MarkdownIt();
 
-  constructor(private folder: string) {}
+  constructor(private folder: string) {
+    super();
+  }
 
   async get(_: Request, response: Response) {
     const text = String(await readFile(join(this.folder, 'README.md')));
