@@ -1,11 +1,10 @@
+import { jest } from '@jest/globals';
 import { IncomingMessage, ServerResponse } from 'http';
 import { Readable } from 'stream';
 import { Resource } from './resource';
 import { Gateway, gateway } from './gateway';
 
 describe('Gateway', () => {
-  beforeAll(() => spyOn(console, 'log'));
-
   function expectHeadBody(response, status, body) {
     expect(response.writeHead).toHaveBeenCalledTimes(1);
     expect(response.end).toHaveBeenCalledTimes(1);
@@ -28,11 +27,11 @@ describe('Gateway', () => {
     request.url = url;
     request.method = method;
 
-    response.writeHead = jasmine.createSpy('writeHead');
-    response.end = jasmine.createSpy('end');
-    response.setHeader = jasmine.createSpy('setHeader');
+    response.writeHead = jest.fn();
+    response.end = jest.fn();
+    response.setHeader = jest.fn();
 
-    const gateway = new Gateway();
+    const gateway = new Gateway({ log() {} });
     return { request, response, gateway };
   }
 

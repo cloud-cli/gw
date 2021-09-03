@@ -2,6 +2,6 @@
 coverage
 dist/*.spec.*
 src/
-jasmine.json
+jest.config.ts
 .github
 test-api.js

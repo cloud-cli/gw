@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import { Resource } from './resource';
 
 describe('Resource', () => {
@@ -8,8 +9,8 @@ describe('Resource', () => {
       const request: any = {};
 
       const response: any = {
-        writeHead: jasmine.createSpy('writeHead'),
-        end: jasmine.createSpy('end'),
+        writeHead: jest.fn(),
+        end: jest.fn(),
       };
 
       resource[methodName](request, response);

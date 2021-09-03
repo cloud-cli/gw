@@ -6,9 +6,8 @@
   "type": "module",
   "types": "dist/index.d.ts",
   "scripts": {
-    "test": "./node_modules/.bin/ts-node ./node_modules/jasmine/bin/jasmine --config=./jasmine.json && node test-api.js",
-    "tdd": "./node_modules/.bin/nodemon -w src -e ts -x npm t",
-    "coverage": "./node_modules/.bin/nyc -r html -e .ts -x \"src/**/*.spec.ts\" npm run test",
+    "test": "jest",
+    "tdd": "jest --watchAll",
     "build": "rm -rf ./dist/* && tsc --project ./tsconfig.json"
   },
   "keywords": [
@@ -17,12 +16,12 @@
   "devDependencies": {
     "@types/body-parser": "^1.19.0",
     "@types/cors": "^2.8.10",
-    "@types/jasmine": "^3.6.3",
+    "@types/jest": "^27.0.1",
     "@types/markdown-it": "^12.0.1",
     "@types/node": "^14.14.31",
-    "jasmine": "^3.6.4",
-    "nodemon": "^2.0.7",
-    "nyc": "^15.1.0",
+    "jest": "^27.1.0",
+    "ts-jest": "^27.0.5",
+    "ts-jest-resolver": "^1.1.0",
     "ts-node": "^9.1.1",
     "typescript": "^4.1.3"
   },

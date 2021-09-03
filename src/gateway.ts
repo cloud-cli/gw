@@ -1,12 +1,14 @@
 import bodyParser from 'body-parser';
 import cors from 'cors';
 import { IncomingMessage, ServerResponse } from 'http';
+import { defaultLogger, Logger } from './logger.js';
 import { Resource } from './resource.js';
 
 const validMethodRe = /^(head|get|post|put|patch|delete)$/i;
 
 export class Gateway {
   private resources = new Map<string, Resource>([]);
+  constructor(protected logger: Logger = defaultLogger) {}
 
   dispatch(request: IncomingMessage, response: ServerResponse) {
     return (
@@ -40,12 +42,6 @@ export class Gateway {
     const { resourceName, methodName } = this.readMethodAndResource(request);
     const resource = this.resources.get(resourceName);
 
-    if (!resource[methodName]) {
-      response.writeHead(405);
-      response.end('');
-      return;
-    }
-
     try {
       await this.processCors(request, response, resource);
       await this.processBody(request, response, resource);
@@ -53,13 +49,13 @@ export class Gateway {
       response.setHeader('X-Powered-by', '@cloud-cli/gw');
       request.url = request.url.slice(1).replace(resourceName, '');
 
-      console.log(JSON.stringify({ name: 'gw', time: Date.now(), method: methodName, resource: resourceName }));
+      this.logger.log(JSON.stringify({ name: 'gw', time: Date.now(), method: methodName, resource: resourceName }));
 
       return await resource[methodName](request, response);
     } catch (error) {
       response.writeHead(500);
       response.end('');
-      console.log(JSON.stringify({ name: 'gw', time: Date.now(), error: error.message, stack: error.stack }));
+      this.logger.log(JSON.stringify({ name: 'gw', time: Date.now(), error: error.message, stack: error.stack }));
     }
   }
 

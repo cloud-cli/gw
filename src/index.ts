@@ -1,5 +1,6 @@
 export { Resource, Request, Response } from './resource.js';
 export { Gateway } from './gateway.js';
+export { Logger } from './logger.js';
 export { Documentation } from './documentation.js';
 
 import { createServer } from 'https';
