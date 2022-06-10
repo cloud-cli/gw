@@ -21,7 +21,9 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: dist
-          path: dist/
+          path: |
+            dist
+            package.json
 
   release:
     needs: build
@@ -33,7 +35,6 @@ jobs:
         uses: actions/download-artifact@v2
         with:
           name: dist
-          path: dist/
 
       - uses: cycjimmy/semantic-release-action@v2.5.0
         env:
