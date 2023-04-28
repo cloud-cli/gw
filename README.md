@@ -82,3 +82,17 @@ export class ResourceWithBody extends Resource {
   };
 }
 ```
+
+## Authorization
+
+Implement the resource method called `auth` to protect resources. The method is async.
+
+```typescript
+import { Resource } from '@cloud-cli/gw';
+
+export class ProtectedResource extends Resource {
+  async auth(request: IncomingMessage, response: ServerResponse) {
+    return Promise.reject(new Error('Nope'));
+  }
+}
+```

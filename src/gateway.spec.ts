@@ -253,13 +253,12 @@ describe('Gateway', () => {
 
   it('should reject unauthorized requests', async () => {
     const { request, response, gateway } = setup('GET', '/auth');
+    const auth = jest.fn(() => Promise.reject(new Error('Unauthorized')));
 
     gateway.add(
       'auth',
       new (class extends Resource {
-        auth() {
-          return Promise.reject(new Error('Unauthorized'))
-        }
+        auth = auth;
 
         get() {
           response.writeHead(200);
@@ -271,5 +270,6 @@ describe('Gateway', () => {
     await gateway.dispatch(request, response);
 
     expectHeadBody(response, 401, 'Error: Unauthorized');
+    expect(auth).toHaveBeenCalledWith(request, response);
   });
 });

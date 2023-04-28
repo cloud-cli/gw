@@ -114,7 +114,7 @@ export class Gateway {
     const resource = this.resources.get(resourceName);
 
     try {
-      const authorized = await resource.auth();
+      const authorized = await resource.auth(request, response);
       return authorized === true;
     } catch (error) {
       response.writeHead(401);

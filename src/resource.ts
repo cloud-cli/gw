@@ -45,7 +45,7 @@ export class Resource {
   body?: BodyParserOptions;
   cors?: CorsOptions;
 
-  async auth() {
+  async auth(_request: IncomingMessage, _response: ServerResponse) {
     return true;
   }
 }

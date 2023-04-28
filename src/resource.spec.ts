@@ -22,8 +22,10 @@ describe('Resource', () => {
     it(`should have a default implementation for auth`, async () => {
       class ImplementedResource extends Resource { }
       const resource = new ImplementedResource();
+      const request: any = {};
+      const response: any = {};
 
-      expect(await resource.auth()).toBe(true);
+      expect(await resource.auth(request, response)).toBe(true);
     });
   });
 });
