@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "type": "module",
   "types": "dist/index.d.ts",
+  "prettier": "@cloud-cli/prettier-config",
   "scripts": {
     "test": "jest",
     "tdd": "jest --watchAll",
@@ -14,15 +15,12 @@
     "cloudy"
   ],
   "devDependencies": {
+    "@cloud-cli/jest-config": "^1.0.0",
+    "@cloud-cli/prettier-config": "^1.0.0",
+    "@cloud-cli/typescript-config": "^1.0.1",
     "@types/body-parser": "^1.19.0",
     "@types/cors": "^2.8.10",
-    "@types/jest": "^27.0.1",
     "@types/markdown-it": "^12.0.1",
-    "@types/node": "^14.14.31",
-    "jest": "^27.1.0",
-    "ts-jest": "^27.0.5",
-    "ts-jest-resolver": "^1.1.0",
-    "ts-node": "^9.1.1",
     "typescript": "^4.1.3"
   },
   "dependencies": {

@@ -8,14 +8,18 @@ const validMethodRe = /^(head|get|post|put|patch|delete)$/i;
 
 export class Gateway {
   private resources = new Map<string, Resource>([]);
-  constructor(protected logger: Logger = defaultLogger) {}
+  constructor(protected logger: Logger = defaultLogger) { }
 
-  dispatch(request: IncomingMessage, response: ServerResponse) {
-    return (
-      this.listAllEndpoints(request, response) ||
-      this.checkResourceAndMethod(request, response) ||
-      this.callMethod(request, response)
-    );
+  async dispatch(request: IncomingMessage, response: ServerResponse) {
+    if (this.listAllEndpoints(request, response) || !this.checkResourceAndMethod(request, response)) {
+      return;
+    }
+
+    const authorized = await this.checkAuthorization(request, response);
+
+    if (authorized) {
+      return this.callMethod(request, response);
+    }
   }
 
   add(name: string, resource: Resource) {
@@ -105,13 +109,27 @@ export class Gateway {
     return { next, promise: out.promise };
   }
 
+  private async checkAuthorization(request: IncomingMessage, response: ServerResponse): Promise<boolean> {
+    const { resourceName } = this.readMethodAndResource(request);
+    const resource = this.resources.get(resourceName);
+
+    try {
+      const authorized = await resource.auth();
+      return authorized === true;
+    } catch (error) {
+      response.writeHead(401);
+      response.end(String(error));
+      return false;
+    }
+  }
+
   private checkResourceAndMethod(request: IncomingMessage, response: ServerResponse): boolean {
     const { resourceName, methodName } = this.readMethodAndResource(request);
 
     if (!this.resources.has(resourceName)) {
       response.writeHead(404);
       response.end('');
-      return true;
+      return false;
     }
 
     if (
@@ -120,8 +138,10 @@ export class Gateway {
     ) {
       response.writeHead(405);
       response.end('');
-      return true;
+      return false;
     }
+
+    return true;
   }
 }
 

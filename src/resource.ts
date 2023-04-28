@@ -11,7 +11,7 @@ export class Request extends IncomingMessage {
   body?: object | null;
 }
 
-export class Response extends ServerResponse {}
+export class Response extends ServerResponse { }
 
 export class Resource {
   head(request: Request, response: Response): Promise<any> | void {
@@ -44,6 +44,10 @@ export class Resource {
 
   body?: BodyParserOptions;
   cors?: CorsOptions;
+
+  async auth() {
+    return true;
+  }
 }
 
 interface BodyParserOptions {

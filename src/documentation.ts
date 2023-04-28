@@ -17,9 +17,9 @@ export class Documentation extends Resource {
     response.setHeader('Content-Type', 'text/html');
     response.writeHead(200);
     response.end(`
-    <link href="https://unpkg.com/tailwindcss/dist/tailwind.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="https://unpkg.com/@tailwindcss/typography@0.4.x/dist/typography.min.css" />
-    <article class="prose lg:prose-xl m-auto py-12">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://unpkg.com/@tailwindcss/typography@0.5.0/dist/typography.min.css" />
+    <article class="prose lg:prose-xl m-auto py-12 px-6">
     ${html}
     </article>
     `);

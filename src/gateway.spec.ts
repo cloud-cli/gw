@@ -31,7 +31,7 @@ describe('Gateway', () => {
     response.end = jest.fn();
     response.setHeader = jest.fn();
 
-    const gateway = new Gateway({ log() {} });
+    const gateway = new Gateway({ log() { } });
     return { request, response, gateway };
   }
 
@@ -245,9 +245,31 @@ describe('Gateway', () => {
       },
     });
 
-    await gateway.dispatch(stream, response);
+    await expect(gateway.dispatch(stream, response)).resolves.toBeUndefined();
 
     expect(stream.body).toEqual(Buffer.from(bufferedContent));
     expectHeadBody(response, 200, 'ok');
+  });
+
+  it('should reject unauthorized requests', async () => {
+    const { request, response, gateway } = setup('GET', '/auth');
+
+    gateway.add(
+      'auth',
+      new (class extends Resource {
+        auth() {
+          return Promise.reject(new Error('Unauthorized'))
+        }
+
+        get() {
+          response.writeHead(200);
+          response.end('ok');
+        }
+      })(),
+    );
+
+    await gateway.dispatch(request, response);
+
+    expectHeadBody(response, 401, 'Error: Unauthorized');
   });
 });
