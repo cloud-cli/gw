@@ -5,67 +5,28 @@ import { defaultLogger, Logger } from './logger.js';
 import { Resource } from './resource.js';
 
 const validMethodRe = /^(head|get|post|put|patch|delete)$/i;
-const timeoutError = new Error('Authorization timeout');
-const unauthorizedError = new Error('Unauthorized');
-const internalError = new Error('Internal error');
-
-type NextFunction = (error?: Error) => void;
-
-class Chain {
-  index = 0;
-  steps: any[] = [];
-
-  constructor(private request: IncomingMessage, private response: ServerResponse) {}
-  
-  next(error?: Error) {
-    let statusCode = 0;
-
-    if (error === timeoutError) {
-      statusCode = 408;
-    }
-    
-    if (error === unauthorizedError) {
-      statusCode = 401;
-    }
-
-    if (this.index >= this.steps.length) {
-      statusCode = 404;
-    }
-    
-    if (statusCode) {
-      this.response.writeHead(statusCode);
-      this.response.end();
-      return; 
-    }
-
-    this[this.index](this.request, this.response, () => this.next());
-  }
-
-  use(...steps: any[]) {
-    this.steps.push(...steps);
-    return this;
-  }
-}
+const notFoundError = new Error('404: Not found');
+const notAllowedError = new Error('405: Method not allowed');
+const unauthorizedError = new Error('401: Unauthorized');
+const internalError = new Error('500: Internal error');
+const END = {};
 
 export class Gateway {
   private resources = new Map<string, Resource>([]);
   
+  /* istanbul ignore next k*/
   constructor(protected logger: Logger = defaultLogger) { }
 
   async dispatch(request: IncomingMessage, response: ServerResponse) {
-    const chain = new Chain(request, response);
-    
-    chain.use(
-      (i, s, n) => this.listAllEndpoints(i, s, n),
-      (i, s, n) => this.checkResourceAndMethod(i, s, n),
-      (i, s, n) => this.checkAuthorization(i, s, n),
-      (i, s, n) => this.callMethod(i, s, n),
-    );
-
     try {
-      chain.next();
+      (
+        await this.listAllEndpoints(request, response) ||
+        await this.checkResourceAndMethod(request, response) ||
+        await this.checkAuthorization(request, response) ||
+        await this.callMethod(request, response)
+      );
     } catch (error) {
-      chain.next(error);
+      this.onError(response, error);
     }
   }
 
@@ -74,28 +35,58 @@ export class Gateway {
     return this;
   }
 
-  private listAllEndpoints(request: IncomingMessage, response: ServerResponse, next: NextFunction) {
+  private onError(response: ServerResponse, error: Error) {
+    const statusCode = String(error).match(/(Error: )?(\d{3})/);
+
+    response.writeHead(statusCode && Number(statusCode[2]));
+    response.end();
+  }
+
+  private async listAllEndpoints(request: IncomingMessage, response: ServerResponse) {
     if (request.url === '/' && request.method === 'GET') {
       response.writeHead(200);
       response.end(JSON.stringify(Array.from(this.resources.keys())));
-      return;    
+      return END;
+    }
+  }
+
+  private async checkAuthorization(request: IncomingMessage, response: ServerResponse) {
+    try {
+      const { resourceName } = this.readMethodAndResource(request);
+      const resource = this.resources.get(resourceName);
+      const authorized = await resource.auth(request, response);
+
+      if (authorized === true) {
+        return;
+      }
+
+      return Promise.reject(unauthorizedError);
+    } catch (error) {
+      this.logger.error(JSON.stringify({ type: 'error', time: Date.now(), error: error.message, stack: error.stack }));
+      throw internalError;
+    }
+  }
+
+  private async checkResourceAndMethod(request: IncomingMessage, response: ServerResponse) {
+    const { resourceName, methodName } = this.readMethodAndResource(request);
+
+    if (!this.resources.has(resourceName)) {
+      throw notFoundError;
     }
 
-    next();
+    if (
+      validMethodRe.test(methodName) === false ||
+      typeof this.resources.get(resourceName)[methodName] !== 'function'
+    ) {
+      throw notAllowedError;
+    }
   }
 
-  private readMethodAndResource(request: IncomingMessage) {
-    const methodName = request.method.toLowerCase();
-    const resourceName = request.url.slice(1).toLowerCase().split('/')[0];
-
-    return { resourceName, methodName };
-  }
-
-  private async callMethod(request: IncomingMessage, response: ServerResponse, next: NextFunction) {
-    const { resourceName, methodName } = this.readMethodAndResource(request);
-    const resource = this.resources.get(resourceName);
-
+  private async callMethod(request: IncomingMessage, response: ServerResponse) {
     try {
+      const { resourceName, methodName } = this.readMethodAndResource(request);
+      const resource = this.resources.get(resourceName);
+
       await this.processCors(request, response, resource);
       await this.processBody(request, response, resource);
 
@@ -104,10 +95,18 @@ export class Gateway {
       this.logger.log(JSON.stringify({ type: 'request', time: Date.now(), method: methodName, resource: resourceName }));
 
       await resource[methodName](request, response);
+      return END;
     } catch (error) {
       this.logger.error(JSON.stringify({ type: 'error', time: Date.now(), error: error.message, stack: error.stack }));
-      next(internalError);
+      throw internalError;
     }
+  }
+
+  private readMethodAndResource(request: IncomingMessage) {
+    const methodName = request.method.toLowerCase();
+    const resourceName = request.url.slice(1).toLowerCase().split('/')[0];
+
+    return { resourceName, methodName };
   }
 
   private async processCors(request: IncomingMessage, response: ServerResponse, resource: Resource) {
@@ -155,46 +154,4 @@ export class Gateway {
     const next = () => out.resolve();
     return { next, promise: out.promise };
   }
-
-  private async checkAuthorization(request: IncomingMessage, response: ServerResponse, next: NextFunction) {
-    const { resourceName } = this.readMethodAndResource(request);
-    const resource = this.resources.get(resourceName);
-    const timeout = setTimeout(() => next(timeoutError), 30_000);
-
-    try {
-      const authorized = await resource.auth(request, response);
-      clearTimeout(timeout);
-
-      if (authorized === true) {
-        next();
-        return; 
-      }
-
-      throw unauthorizedError;
-    } catch (error) {
-      next(error);
-    }
-  }
-
-  private checkResourceAndMethod(request: IncomingMessage, response: ServerResponse, next: NextFunction): boolean {
-    const { resourceName, methodName } = this.readMethodAndResource(request);
-
-    if (!this.resources.has(resourceName)) {
-      response.writeHead(404);
-      response.end('');
-      return;
-    }
-
-    if (
-      validMethodRe.test(methodName) === false ||
-      typeof this.resources.get(resourceName)[methodName] !== 'function'
-    ) {
-      response.writeHead(405);
-      response.end('');
-    }
-
-    next();
-  }
 }
-
-export const gateway = new Gateway();

@@ -2,15 +2,18 @@ import { jest } from '@jest/globals';
 import { IncomingMessage, ServerResponse } from 'http';
 import { Readable } from 'stream';
 import { Resource } from './resource';
-import { Gateway, gateway } from './gateway';
+import { Gateway } from './gateway';
 
 describe('Gateway', () => {
-  function expectHeadBody(response, status, body) {
+  function expectHeadBody(response, status, body?) {
     expect(response.writeHead).toHaveBeenCalledTimes(1);
     expect(response.end).toHaveBeenCalledTimes(1);
 
     expect(response.writeHead).toHaveBeenCalledWith(status);
-    expect(response.end).toHaveBeenCalledWith(body);
+
+    if (body !== undefined) {
+      expect(response.end).toHaveBeenCalledWith(body);
+    }
   }
 
   function createStream(data: string) {
@@ -31,35 +34,31 @@ describe('Gateway', () => {
     response.end = jest.fn();
     response.setHeader = jest.fn();
 
-    const gateway = new Gateway({ log() { } });
+    const gateway = new Gateway({ log() { }, error() { } });
     return { request, response, gateway };
   }
 
-  it('has a gateway object', () => {
-    expect(gateway).not.toBeUndefined();
-  });
-
-  it('should send 404', () => {
+  it('should send 404', async () => {
     const { request, response, gateway } = setup('GET', '');
-    gateway.dispatch(request, response);
+    await gateway.dispatch(request, response);
 
-    expectHeadBody(response, 404, '');
+    expectHeadBody(response, 404);
   });
 
-  it('should list all resources', () => {
+  it('should list all resources', async () => {
     const { request, response, gateway } = setup('GET', '/');
     gateway.add('test', new Resource());
-    gateway.dispatch(request, response);
+    await gateway.dispatch(request, response);
 
     expectHeadBody(response, 200, '["test"]');
   });
 
-  it('should reject invalid method', () => {
+  it('should reject invalid methsod', async () => {
     const { request, response, gateway } = setup('FOO', '/test');
     gateway.add('test', new Resource());
-    gateway.dispatch(request, response);
+    await gateway.dispatch(request, response);
 
-    expectHeadBody(response, 405, '');
+    expectHeadBody(response, 405);
   });
 
   it('should catch resource errors', async () => {
@@ -74,7 +73,7 @@ describe('Gateway', () => {
 
     await gateway.dispatch(request, response);
 
-    expectHeadBody(response, 500, '');
+    expectHeadBody(response, 500);
   });
 
   it('should process a GET request', async () => {
@@ -251,25 +250,31 @@ describe('Gateway', () => {
     expectHeadBody(response, 200, 'ok');
   });
 
-  it('should reject unauthorized requests', async () => {
+  it('should catch authorization errors', async () => {
     const { request, response, gateway } = setup('GET', '/auth');
-    const auth = jest.fn(() => Promise.reject(new Error('Unauthorized')));
+    const auth = jest.fn(() => { throw new Error('Unauthorized') });
 
-    gateway.add(
-      'auth',
-      new (class extends Resource {
-        auth = auth;
-
-        get() {
-          response.writeHead(200);
-          response.end('ok');
-        }
-      })(),
-    );
+    gateway.add('auth', new (class extends Resource {
+      auth = auth;
+    })());
 
     await gateway.dispatch(request, response);
 
-    expectHeadBody(response, 401, 'Error: Unauthorized');
     expect(auth).toHaveBeenCalledWith(request, response);
+    expectHeadBody(response, 500);
+  });
+
+  it('should reject unauthorized requests', async () => {
+    const { request, response, gateway } = setup('GET', '/auth');
+    const auth = jest.fn(() => Promise.resolve(false));
+
+    gateway.add('auth', new (class extends Resource {
+      auth = auth;
+    })());
+
+    await gateway.dispatch(request, response);
+
+    expect(auth).toHaveBeenCalledWith(request, response);
+    expectHeadBody(response, 401);
   });
 });
